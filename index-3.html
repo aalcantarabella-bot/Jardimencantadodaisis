@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirmação de Presença</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Allura&family=Poppins:wght@300;500&display=swap');
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Poppins', sans-serif;
+      background: url("fundo-convite.png") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.88);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+      text-align: center;
+      backdrop-filter: blur(2px);
+    }
+
+    h1 {
+      font-family: 'Allura', cursive;
+      font-size: 2.6em;
+      color: #b08d57;
+      margin: 0 0 16px 0;
+      line-height: 1.1;
+    }
+
+    form {
+      margin-top: 8px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #b08d57;
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform .05s ease, background .2s ease;
+    }
+    button:active { transform: translateY(1px); }
+    button:hover { background: #96703f; }
+
+    .msg {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #1d7f36;
+      display: none;
+    }
+
+    h2 {
+      margin: 22px 0 10px;
+      font-size: 1.15em;
+      color: #444;
+      font-weight: 600;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+      max-height: 320px;
+      overflow: auto;
+    }
+
+    li {
+      background: rgba(255,255,255,0.95);
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    li::before {
+      content: "✅";
+      flex: 0 0 auto;
+    }
+
+    .muted { color: #666; font-size: 13px; }
+    .error { color: #b00020; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Confirmação de Presença</h1>
+
+    <!-- Formulário -->
+    <form id="form">
+      <input type="text" name="nome" placeholder="Digite seu nome (responsável)" required autocomplete="name">
+      <button type="submit">Confirmar Presença</button>
+    </form>
+
+    <p class="msg" id="ok">✨ Obrigado! Sua presença foi confirmada! ✨</p>
+    <p class="msg error" id="erro">Ops, não consegui enviar agora. Tente de novo.</p>
+
+    <!-- Lista de confirmados -->
+    <h2>Lista de Confirmados</h2>
+    <p class="muted" id="statusLista">Carregando lista...</p>
+    <ul id="lista"></ul>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwU1sWJgMn1iuOuwSRSmRt5wkngaNryywqZY3iBHyJzhJ7aDhKG9qtlnwz_V7IyfI4_CQ/exec";
+    const sheetURLBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8cmM6DyzwAkvDaVgmdZu-Im7QJTKtBCoH9RBzm1_ujkGr6jBQLecQn1yYYpV0yEs4yDDpdf40nWoF/pub?output=csv&gid=798750154";
+
+    const form = document.getElementById('form');
+    const okMsg = document.getElementById('ok');
+    const errMsg = document.getElementById('erro');
+    const lista = document.getElementById('lista');
+    const statusLista = document.getElementById('statusLista');
+
+    // Enviar confirmação (modo no-cors para evitar bloqueio visual de CORS; envio é realizado mesmo sem ler a resposta)
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      okMsg.style.display = 'none';
+      errMsg.style.display = 'none';
+
+      try {
+        await fetch(scriptURL, { method: 'POST', body: new FormData(form), mode: 'no-cors' });
+        okMsg.style.display = 'block';
+        form.reset();
+        // espera a planilha atualizar no backend antes de recarregar
+        setTimeout(carregarLista, 1200);
+      } catch (err) {
+        console.error(err);
+        errMsg.style.display = 'block';
+      }
+    });
+
+    // Cache-busting para evitar lista travada
+    function csvURL() {
+      const bust = Date.now();
+      const sep = sheetURLBase.includes('?') ? '&' : '?';
+      return sheetURLBase + sep + '_=' + bust;
+    }
+
+    // Parsing simples de CSV (sem aspas)
+    function parseCSV(text) {
+      const linhas = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim() !== '');
+      if (linhas.length === 0) return [];
+      // remove cabeçalho
+      return linhas.slice(1).map(l => l.split(','));
+    }
+
+    async function carregarLista() {
+      statusLista.textContent = 'Carregando lista...';
+      lista.innerHTML = '';
+      try {
+        const res = await fetch(csvURL(), { cache: 'no-store' });
+        const text = await res.text();
+        const rows = parseCSV(text);
+        if (rows.length === 0) {
+          statusLista.textContent = 'Nenhum confirmado ainda.';
+          return;
+        }
+        statusLista.textContent = '';
+        rows.forEach(cols => {
+          const nome = (cols[0] || '').trim();
+          const resp = (cols[1] || '').trim();
+          if (!nome) return;
+          const li = document.createElement('li');
+          li.textContent = resp ? `${nome} (confirmado por ${resp})` : nome;
+          lista.appendChild(li);
+        });
+      } catch (err) {
+        console.error(err);
+        statusLista.textContent = 'Não foi possível carregar a lista agora.';
+      }
+    }
+
+    // Carrega a lista ao abrir a página
+    carregarLista();
+  </script>
+</body>
+</html>
