@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmação de Presença</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;500&display=swap');
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("fundo-convite.png") no-repeat center center;
+      background-size: cover;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .formulario {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 15px;
+      padding: 25px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 2em;
+      color: #b08d57;
+      margin-bottom: 15px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      background: #b08d57;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #96703f;
+    }
+
+    .msg {
+      margin-top: 12px;
+      font-size: 14px;
+      color: green;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="formulario">
+    <h1>Confirmação de Presença</h1>
+    <form id="form">
+      <input type="text" name="nome" placeholder="Digite seu nome" required>
+      <select name="acompanhantes" required>
+        <option value="">Número de acompanhantes</option>
+        <option value="0">Nenhum</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3+">3 ou mais</option>
+      </select>
+      <button type="submit">Confirmar Presença</button>
+    </form>
+    <p class="msg">✨ Obrigado! Sua presença foi confirmada! ✨</p>
+  </div>
+
+  <script>
+    // Cole aqui a URL do Google Apps Script quando criar
+    const scriptURL = "COLE_AQUI_SUA_URL_DO_SCRIPT";
+    const form = document.getElementById('form');
+    const msg = document.querySelector('.msg');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => {
+          msg.style.display = 'block';
+          form.reset();
+        })
+        .catch(error => alert('Erro ao enviar confirmação'));
+    });
+  </script>
+</body>
+</html>
