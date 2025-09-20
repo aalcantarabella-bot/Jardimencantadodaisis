@@ -104,6 +104,7 @@
     <!-- Formulário -->
     <form id="form">
       <input type="text" name="nome" placeholder="Digite seu nome (responsável)" required autocomplete="name">
+      <input type="number" name="acompanhantes" placeholder="Nº de acompanhantes" required min="0">
       <button type="submit">Confirmar Presença</button>
     </form>
 
@@ -117,8 +118,8 @@
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwU1sWJgMn1iuOuwSRSmRt5wkngaNryywqZY3iBHyJzhJ7aDhKG9qtlnwz_V7IyfI4_CQ/exec";
-    const sheetURLBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8cmM6DyzwAkvDaVgmdZu-Im7QJTKtBCoH9RBzm1_ujkGr6jBQLecQn1yYYpV0yEs4yDDpdf40nWoF/pub?output=csv&gid=798750154";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx-A6grJqDlFkKOAeEdji08fl3exUEeGIJ6SZh31DyM38QZoe3FtEOMh_BfAzlC0fD16Q/exec";
+    const sheetURLBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8cmM6DyzwAkvDaVgmdZu-Im7QJTKtBCoH9RBzm1_ujkGr6jBQLecQn1yYYpV0yEs4yDDpdf40nWoF/pub?output=csv&gid=0";
 
     const form = document.getElementById('form');
     const okMsg = document.getElementById('ok');
@@ -167,10 +168,10 @@
         statusLista.textContent = '';
         rows.forEach(cols => {
           const nome = (cols[0] || '').trim();
-          const resp = (cols[1] || '').trim();
+          const acomp = (cols[1] || '').trim();
           if (!nome) return;
           const li = document.createElement('li');
-          li.textContent = resp ? `${nome} (confirmado por ${resp})` : nome;
+          li.textContent = acomp ? `${nome} (+${acomp} acompanhantes)` : nome;
           lista.appendChild(li);
         });
       } catch (err) {
