@@ -101,8 +101,7 @@
       e.preventDefault();
       okMsg.style.display = 'none';
       errMsg.style.display = 'none';
-      const payload = JSON.stringify({ parameter: { nome: convidadoInput } });
-      console.log(new FormData(form));
+      const payload = JSON.stringify({ parameter: { nome: convidadoInput.value } });
       try {
         await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, mode: 'no-cors' });
         okMsg.style.display = 'block';
