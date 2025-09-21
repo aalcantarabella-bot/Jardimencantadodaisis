@@ -101,7 +101,7 @@
       e.preventDefault();
       okMsg.style.display = 'none';
       errMsg.style.display = 'none';
-      const payload = JSON.stringfy({ nome: convidadoInput.value });
+      const payload = JSON.stringify({ nome: convidadoInput.value });
       console.log('Test payload', payload);
       try {
         await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, mode: 'no-cors' });
