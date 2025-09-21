@@ -81,7 +81,7 @@
 
     <!-- Formulário -->
     <form id="form">
-      <input type="text" name="nome" id="convidado" placeholder="Digite seu nome completo" required autocomplete="name">
+      <input type="text" name="nome" placeholder="Digite seu nome completo" required autocomplete="name">
       <button type="submit">Confirmar Presença</button>
     </form>
 
@@ -93,7 +93,6 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbw-UX5bouHUrxliJ3btT6T6UdRGlT2GEJx46xpy-kUiw7HzHMyLgLCAA50GN6EV2SDazA/exec";
 
     const form = document.getElementById('form');
-    const convidadoInput = document.getElementById('convidado');
     const okMsg = document.getElementById('ok');
     const errMsg = document.getElementById('erro');
 
@@ -101,9 +100,8 @@
       e.preventDefault();
       okMsg.style.display = 'none';
       errMsg.style.display = 'none';
-      const payload = JSON.stringify({ parameter: { nome: convidadoInput.value } });
       try {
-        await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, mode: 'no-cors' });
+        await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: new FormData(form), mode: 'no-cors' });
         okMsg.style.display = 'block';
         form.reset();
       } catch (err) {
