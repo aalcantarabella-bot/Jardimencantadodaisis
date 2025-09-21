@@ -43,7 +43,7 @@
     }
 
     button {
-      background: #E91E63;  /* rosa */
+      background: #E91E63;
       color: white;
       font-weight: 600;
       border: none;
@@ -51,7 +51,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       padding: 12px;
-      box-shadow: 0 4px 0 #000, 0 6px 12px rgba(0,0,0,0.6); /* sombra preta para 3D */
+      box-shadow: 0 4px 0 #000, 0 6px 12px rgba(0,0,0,0.6);
     }
     button:hover {
       background: #C2185B;
@@ -111,18 +111,16 @@
     <p class="msg" id="ok">✨ Obrigado! Sua presença foi confirmada! ✨</p>
     <p class="msg error" id="erro">Ops, não consegui enviar agora. Tente de novo.</p>
 
-    <!-- Lista de confirmados -->
-    <h2>Lista de Confirmados</h2>
+    <!-- Lista de pendentes -->
+    <h2>Quem ainda não confirmou</h2>
     <p class="muted" id="statusLista">Carregando lista...</p>
     <ul id="lista"></ul>
   </div>
 
   <script>
-    // 🚨 Cole aqui sua nova URL do Apps Script (terminando com /exec)
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzeizx0mVGIUU_Otfv6j1EroneaBxkwmq5wP2fuYGbFsJtwCr0A7_Sjegj_fzReEv6TNQ/exec";
-
-    // link da planilha publicada em CSV
-    const sheetURLBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8cmM6DyzwAkvDaVgmdZu-Im7QJTKtBCoH9RBzm1_ujkGr6jBQLecQn1yYYpV0yEs4yDDpdf40nWoF/pub?output=csv&gid=0";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyM9z34QRZBbvv9iR2TaPJkrYxt6tdjmOLi-4aVFuuLkvppou4H5QzCRg2ax4XIDofVQw/exec";
+    const urlConvidados = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8cmM6DyzwAkvDaVgmdZu-Im7QJTKtBCoH9RBzm1_ujkGr6jBQLecQn1yYYpV0yEs4yDDpdf40nWoF/pub?gid=1415338195&single=true&output=csv";
+    const urlConfirmados = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8cmM6DyzwAkvDaVgmdZu-Im7QJTKtBCoH9RBzm1_ujkGr6jBQLecQn1yYYpV0yEs4yDDpdf40nWoF/pub?gid=0&single=true&output=csv";
 
     const form = document.getElementById('form');
     const okMsg = document.getElementById('ok');
@@ -138,22 +136,16 @@
         await fetch(scriptURL, { method: 'POST', body: new FormData(form), mode: 'no-cors' });
         okMsg.style.display = 'block';
         form.reset();
-        setTimeout(carregarLista, 1200);
+        setTimeout(carregarLista, 2000);
       } catch (err) {
         console.error(err);
         errMsg.style.display = 'block';
       }
     });
 
-    function csvURL() {
-      const bust = Date.now();
-      const sep = sheetURLBase.includes('?') ? '&' : '?';
-      return sheetURLBase + sep + '_=' + bust;
-    }
-
     function parseCSV(text) {
       const linhas = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim() !== '');
-      if (linhas.length === 0) return [];
+      if (linhas.length <= 1) return [];
       return linhas.slice(1).map(l => l.split(','));
     }
 
@@ -161,25 +153,31 @@
       statusLista.textContent = 'Carregando lista...';
       lista.innerHTML = '';
       try {
-        const res = await fetch(csvURL(), { cache: 'no-store' });
-        const text = await res.text();
-        const rows = parseCSV(text);
-        if (rows.length === 0) {
-          statusLista.textContent = 'Nenhum confirmado ainda.';
+        const resConvidados = await fetch(urlConvidados);
+        const convidadosCSV = await resConvidados.text();
+        const convidados = parseCSV(convidadosCSV).map(c => c[0].trim());
+
+        const resConfirmados = await fetch(urlConfirmados);
+        const confirmadosCSV = await resConfirmados.text();
+        const confirmados = parseCSV(confirmadosCSV).map(c => c[0].trim());
+
+        const pendentes = convidados.filter(nome => nome && !confirmados.includes(nome));
+
+        if (pendentes.length === 0) {
+          statusLista.textContent = '🎉 Todos já confirmaram!';
           return;
         }
+
         statusLista.textContent = '';
-        rows.forEach(cols => {
-          const nome = (cols[0] || '').trim();
-          const acomp = (cols[1] || '').trim();
-          if (!nome) return;
+        pendentes.forEach(nome => {
           const li = document.createElement('li');
-          li.textContent = acomp ? `${nome} (+${acomp} acompanhantes)` : nome;
+          li.textContent = nome;
           lista.appendChild(li);
         });
+
       } catch (err) {
         console.error(err);
-        statusLista.textContent = 'Não foi possível carregar a lista agora.';
+        statusLista.textContent = 'Erro ao carregar lista.';
       }
     }
 
