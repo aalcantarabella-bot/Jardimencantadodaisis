@@ -97,9 +97,10 @@
     const errMsg = document.getElementById('erro');
 
     form.addEventListener('submit', async (e) => {
-      const name = form.getElementById('convidado');
-      console.log(name);
       e.preventDefault();
+      //const name = form.getElementById('convidado');
+      //console.log(name);
+      console.log(e);
       okMsg.style.display = 'none';
       errMsg.style.display = 'none';
       try {
