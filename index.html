@@ -93,14 +93,13 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbw0I5HCGwVTcr2Z48uosuB-SwE2oOM_zJeIegtKxmxhtaG_JHGJFylpBebUCwUbu25EFQ/exec";
 
     const form = document.getElementById('form');
+    const convidadoInput = document.getElementById('convidado');
     const okMsg = document.getElementById('ok');
     const errMsg = document.getElementById('erro');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      //const name = form.getElementById('convidado');
-      //console.log(name);
-      console.log(e);
+      console.log(e, convidadoInput);
       okMsg.style.display = 'none';
       errMsg.style.display = 'none';
       try {
