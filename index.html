@@ -104,7 +104,7 @@
       errMsg.style.display = 'none';
       const payload = { nome: convidadoInput.value };
       try {
-        await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' } body: payload, mode: 'no-cors' });
+        await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, mode: 'no-cors' });
         okMsg.style.display = 'block';
         form.reset();
       } catch (err) {
