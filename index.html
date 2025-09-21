@@ -81,7 +81,7 @@
 
     <!-- Formulário -->
     <form id="form">
-      <input type="text" name="nome" placeholder="Digite seu nome completo" required autocomplete="name">
+      <input type="text" name="nome" id="convidado" placeholder="Digite seu nome completo" required autocomplete="name">
       <button type="submit">Confirmar Presença</button>
     </form>
 
@@ -97,7 +97,8 @@
     const errMsg = document.getElementById('erro');
 
     form.addEventListener('submit', async (e) => {
-      console.log(new FormData(form));
+      const name = form.getElementById('convidado');
+      console.log(name);
       e.preventDefault();
       okMsg.style.display = 'none';
       errMsg.style.display = 'none';
